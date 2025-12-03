@@ -1,0 +1,64 @@
+cp /mnt/c/Users/belal/OneDrive/Desktop/College/7thTerm/Distributed/Project/toronto_climate.csv .
+
+sudo service ssh start
+start-dfs.sh
+start-yarn.sh
+
+hdfs dfs -mkdir -p /data/weather
+hdfs dfs -put toronto_climate.csv /data/weather/
+hdfs dfs -ls /data/weather
+
+nano mapper_year_stats.py
+nano reducer_max_temp_csv.py
+chmod +x mapper_year_stats.py
+
+nano mapper_max_temp.py
+nano reducer_max_temp_csv.py
+chmod +x mapper_max_temp.py
+
+nano mapper_min_temp.py
+nano reducer_min_temp_csv.py
+chmod +x mapper_min_temp.py
+
+
+hdfs dfs -rm -r -f /output/year_stats_csv
+
+hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-*.jar \
+  -input /data/weather/toronto_climate.csv \
+  -output /output/year_stats_csv \
+  -mapper ./mapper_year_stats.py \
+  -reducer ./reducer_year_stats_csv.py \
+  -file mapper_year_stats.py \
+  -file reducer_year_stats_csv.py
+
+hdfs dfs -cat /output/year_stats_csv/part-* > year_stats.csv
+
+
+hdfs dfs -rm -r -f /output/max_temp_csv
+
+hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-*.jar \
+  -input /data/weather/toronto_climate.csv \
+  -output /output/max_temp_csv \
+  -mapper ./mapper_max_temp.py \
+  -reducer ./reducer_max_temp_csv.py \
+  -file mapper_max_temp.py \
+  -file reducer_max_temp_csv.py
+
+hdfs dfs -cat /output/max_temp_csv/part-* > max_temp_per_year.csv
+
+
+hdfs dfs -rm -r -f /output/min_temp_csv
+
+hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-*.jar \
+  -input /data/weather/toronto_climate.csv \
+  -output /output/min_temp_csv \
+  -mapper ./mapper_min_temp.py \
+  -reducer ./reducer_min_temp_csv.py \
+  -file mapper_min_temp.py \
+  -file reducer_min_temp_csv.py
+
+hdfs dfs -cat /output/min_temp_csv/part-* > min_temp_per_year.csv
+
+
+cp year_stats.csv max_temp_per_year.csv min_temp_per_year.csv \
+  /mnt/c/Users/belal/OneDrive/Desktop/College/7thTerm/Distributed/Project/
