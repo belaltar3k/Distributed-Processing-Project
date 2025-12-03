@@ -9,7 +9,7 @@ hdfs dfs -put toronto_climate.csv /data/weather/
 hdfs dfs -ls /data/weather
 
 nano mapper_year_stats.py
-nano reducer_max_temp_csv.py
+nano reducer_year_stats_csv.py
 chmod +x mapper_year_stats.py
 
 nano mapper_max_temp.py
